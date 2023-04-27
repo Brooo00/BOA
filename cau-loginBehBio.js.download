@@ -1,0 +1,94 @@
+(function(){
+    
+    $(document).ready(function () {
+        var callOptionB = function(env,cookie,bioCatchUrl){
+        var lleUrl = window.location.host.indexOf('helix.ecnp') > -1 ? true : false;
+        var lleOptionBCdnUrl = "";
+        var prodOptionBCdnUrl = "";
+        var scriptTagOptionB = document.createElement("script");
+        if (lleUrl){
+            var lle = window.location.host.split('-')[1];
+           // lleOptionBCdnUrl = "https://origin-bac-assets-" + lle + "-helix.ecnp.bankofamerica.com/nucleus/spa-assets/components/utilities/nucleus/extensions/bbvend1-lle/2.0.0/js/8cee542.js";
+           lleOptionBCdnUrl = bioCatchUrl;
+        } else {
+        //    prodOptionBCdnUrl = "https://origin-bac-assets.bankofamerica.com/nucleus/spa-assets/components/utilities/nucleus/extensions/bbvend1/2.0.0/js/532e636f.js";
+        prodOptionBCdnUrl = bioCatchUrl;
+        }
+        
+        var context = "login-secure-signin"
+        if(env==='prod'){
+            scriptTagOptionB.setAttribute("src", prodOptionBCdnUrl);
+        } else {
+            scriptTagOptionB.setAttribute("src", lleOptionBCdnUrl);
+        }
+       
+       // document.body.appendChild(scriptTagOptionB);
+       document.getElementsByTagName("head")[0].appendChild(scriptTagOptionB);
+      
+       scriptTagOptionB.onload = function(){
+         cdApi.setCustomerSessionId(cookie);
+         cdApi.changeContext(context);
+     }
+    }
+    
+    var loadVendBehBio = function(){
+
+        var csidCookie = document.cookie.split('; ');
+        var csidCookieValue = "";
+        var csidCookieVendorSelector = "";
+        var bioCatchUrl = "";
+        document.cookie.split('; ').forEach(function(row) {
+            if (row.startsWith('CSID=')) {
+                csidCookieValue = row.split('CSID=')[1].split(':')[0];
+            }
+            if (row.startsWith('AHVC=')) {
+                csidCookieVendorSelector = row.split(':')[0].split('AHVC=')[1];
+                bioCatchUrl = row.split(':')[3] + ':' + row.split(':')[4];
+            }
+        })
+
+        var isLleUrl = window.location.host.indexOf('helix.ecnp') > -1 ? true : false;
+
+        if(csidCookieVendorSelector === "4-4" || csidCookieVendorSelector === "4-5" || csidCookieVendorSelector === "4-6" || csidCookieVendorSelector === "4-7" || csidCookieVendorSelector === "5-4" || csidCookieVendorSelector === "5-5" || csidCookieVendorSelector === "5-6" || csidCookieVendorSelector === "5-7" || csidCookieVendorSelector === "6-4" || csidCookieVendorSelector === "6-5" || csidCookieVendorSelector === "6-6" || csidCookieVendorSelector === "6-7" || csidCookieVendorSelector === "7-4" || csidCookieVendorSelector === "7-5" || csidCookieVendorSelector === "7-6" || csidCookieVendorSelector === "7-7"
+        || csidCookieVendorSelector === "0-4" || csidCookieVendorSelector === "0-5" || csidCookieVendorSelector === "0-6" || csidCookieVendorSelector === "0-7" || csidCookieVendorSelector === "1-4" || csidCookieVendorSelector === "1-5" || csidCookieVendorSelector === "1-6" || csidCookieVendorSelector === "1-7" || csidCookieVendorSelector === "2-4" || csidCookieVendorSelector === "2-5" || csidCookieVendorSelector === "2-6" || csidCookieVendorSelector === "2-7" || csidCookieVendorSelector === "3-4" || csidCookieVendorSelector === "3-5" || csidCookieVendorSelector === "3-6" || csidCookieVendorSelector === "3-7"){
+            
+            if (isLleUrl){
+                callOptionB('lle',csidCookieValue,bioCatchUrl);
+            } else {
+                callOptionB('prod',csidCookieValue,bioCatchUrl);
+            }
+        } 
+    }
+
+    var iaCall = function (){
+        $.ajax({
+        type: 'GET',
+        url: "/login/rest/sas/sparta/v2/iac?dfp=true",
+        crossDomain: true,
+        cache: false,
+        timeout: 60000,
+        processData: false,
+        xhrFields: {
+            withCredentials: true,
+        },
+        dataType: 'text',
+        headers: {
+            'content-type': 'application/json',
+            accept: 'application/json',
+            'cache-control': 'no-cache',
+         },
+         error: function(XMLHTTPRequest,textStatus,errorThrown){
+            
+         },
+         success: function(data){
+             loadVendBehBio();
+         },
+         complete: function(XMLHTTPRequest,textStatus){
+             
+              }
+             });
+         }
+         iaCall();
+    });
+    
+    })();
